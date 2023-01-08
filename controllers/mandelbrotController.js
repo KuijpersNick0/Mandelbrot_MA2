@@ -9,7 +9,6 @@ exports.initialise = function(request, response) {
     let imag = request.body.imag;
     let itt = request.body.itt;
     result = checkMandelbrot([parseFloat(real), parseFloat(imag)], parseInt(itt));
-    // console.log(real, imag);
     response.json(result);
 }
 

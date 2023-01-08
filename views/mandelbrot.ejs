@@ -111,9 +111,9 @@
       while (re < maxRe) {
         var im = minIm;
         while (im < maxIm) {
-          // var result = checkMandelbrot([re, im], maxIterations);
-          var result = belongs(re, im, maxIterations);
-          // result = result[1];
+          var result = checkMandelbrot([re, im], maxIterations);
+          // var result = belongs(re, im, maxIterations);
+          result = result[1];
           var x = (re - minRe) / reStep, y = (im - minIm) / imStep;
           if (result == maxIterations) {
             pixel(x, y, 'black');

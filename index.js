@@ -1,7 +1,7 @@
 const express = require('express');
 const cluster = require('cluster');
 
-// Check the number of available CPU.
+//check nbre de CPU
 const numCPUs = require('os').cpus().length;
 
 const app = express();
@@ -9,16 +9,21 @@ app.use(express.urlencoded({extended:true}));
 const PORT = 3001;
 
 let routes = require('./routes');
-app.use('/', routes);
 
 //pour css-images-js
-app.use(express.static('public'));
+app.use(express.static('/public'));
+//routes
+app.use('/', routes);
 
+//SI NGINX AS REVERSE PROXY
+// app.listen(80);
+
+//SI CLUSTER
 // Master process
 if (cluster.isMaster) {
     console.log(`Master ${process.pid} is running`);
 
-    // Fork workers.
+    // Fork workers
     for (let i = 0; i < numCPUs-1; i++) {
         cluster.fork();
     }
@@ -27,12 +32,10 @@ if (cluster.isMaster) {
     cluster.on('exit', (worker, code, signal) => {
         console.log(`worker ${worker.process.pid} died`);
     });
-}
 
-// Worker process
+} // Worker process
 else {
-    // Workers can share any TCP connection
-    // In this case it is an HTTP server
+    //Partage connection 
     app.listen(PORT, err => {
         err ?
         console.log("Error in server setup") :
