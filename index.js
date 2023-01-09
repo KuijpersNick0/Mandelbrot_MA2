@@ -6,7 +6,7 @@ const numCPUs = require('os').cpus().length;
 
 const app = express();
 app.use(express.urlencoded({extended:true}));
-const PORT = 3001;
+const PORT = 80;
 
 let routes = require('./routes');
 
@@ -17,8 +17,11 @@ app.use('/', routes);
 
 //SI NGINX AS REVERSE PROXY
 // app.listen(80);
+// app.listen(3002);
+// app.listen(3003);
+// app.listen(3004);
 
-//SI CLUSTER
+// SI CLUSTER
 // Master process
 if (cluster.isMaster) {
     console.log(`Master ${process.pid} is running`);
@@ -41,4 +44,7 @@ else {
         console.log("Error in server setup") :
         console.log(`Worker ${process.pid} started`);
     });
+    app.listen(3002);
+    app.listen(3003);
+    app.listen(3004);
 }

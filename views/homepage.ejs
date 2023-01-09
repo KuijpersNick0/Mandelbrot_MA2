@@ -38,8 +38,6 @@
     const confirmBtn = document.getElementById('confirmBtn');
     const myResult = document.getElementById("resultat");
 
-    const myRequest = new Request('mandelbrot.json');
-
     confirmBtn.addEventListener('click', e => {
         const data = {real : parseFloat(real.value), imag : parseFloat(imag.value), itt : parseFloat(itt.value)}
         postData('/mandelbrot.json', data).then((data) => {

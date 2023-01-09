@@ -1,7 +1,7 @@
 let express = require('express');
 let router = express.Router();
 var bodyParser = require('body-parser');
-var cors = require('cors');
+var cors = require('cors'); 
 
 //Enable CORS
 router.use(cors());
