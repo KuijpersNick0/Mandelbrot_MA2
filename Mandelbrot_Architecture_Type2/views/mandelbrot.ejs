@@ -1,0 +1,135 @@
+<html>
+  <head>
+    <title>Mandelbrot Set</title>
+  </head>
+  <body>
+    <h2>Afficher l'ensemble de mandelbrot jusqu'à réelle max et imaginaire max</h2>
+    <div>
+      <form id="choixComplexes">
+        <div class="container">
+          <label for="realMax"> <strong>Partie réelle max</strong></label>
+          <input id="realMax" placeholder="Enter real number" name="realMax" step="0.1" required >
+        
+          <label for="imMax"> <strong>Partie imaginaire max</strong></label>
+          <input id="imMax" placeholder="Enter imaginary number" name="imMax" step="0.1" required>
+
+          <label for="ittMax"> <strong>Itérations max</strong></label>
+          <input id="ittMax" placeholder="Enter number" name="ittMax" required>
+        </div>
+        <button type="submit" id="confirmBtnDraw">Afficher</button>
+      </form>
+    </div>
+
+    <canvas id="canvas" width="450" height="300"></canvas>
+  
+  </body>
+</html>
+<script> 
+
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    const maxRe = document.getElementById('realMax');
+    const maxIm = document.getElementById('imMax');
+    const maxItt = document.getElementById('ittMax');
+    const confirmBtnDraw = document.getElementById('confirmBtnDraw');
+
+    confirmBtnDraw.addEventListener('click', e => {
+        draw(450, 300, maxRe.value, maxIm.value, maxItt.value); 
+        e.preventDefault();
+    });
+
+    async function postData(url='', data={}) {
+      //Crash serveur trop d'API calls, mémoire saturée?
+        const response = await fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data) 
+        });
+        return response.json();
+    }
+    
+    function belongs(re, im, iterations) {
+      const data = {real : parseFloat(re), imag : parseFloat(im), itt : parseFloat(iterations)}
+      postData('/api/calculate', data).then((data) => {
+          return data[1]
+      })
+    }
+    
+    function checkMandelbrot(z, n) {
+      //Suite de Mandelbrot
+      //(z^2 + c) dont module ne depasse pas 2
+      //Avec z = a + bi
+      //Et c = x + yi
+      a = z;
+      //Z0 = 0
+      //Donc z1 = z0^2 + c = 0 +c
+      //Donc z2 = z1^2 + c = c^2 + c
+      //Donc z3 = z2^2 + c = c^4 + 2c^3 + c^2 + c 
+      //.... ETC
+      var i, a, module, b, c;
+      for (i = 0; i < n; i++) {
+          a = helper(a); //[(a^2 - b^2) + a, (2ab) + b]    
+          b = Math.pow(a[0], 2)  //((a^2-b^2) + a)^2  
+          c = Math.pow(a[1], 2)   //(2ab + b)^2
+          module = Math.pow(b + c, 0.5) //sqrt(((a^2-b^2) + a)^2 + (2ab + b)^2)
+          if (module > 2)
+              return [false, i];
+      }
+      return [true, i];
+      
+      function square(a) {
+          var rResult, iResult;
+          rResult = a[0] * a[0] - a[1] * a[1]; //a^2 - b^2
+          iResult = 2 * a[0] * a[1]; //2ab
+          return [rResult, iResult];  //return [a^2 - b^2, 2ab]
+      }
+
+      // Compute z^2 + c
+      function helper(a) {
+          var raisedToPower, sum;
+          raisedToPower = square(a); //[a^2 - b^2, 2ab]
+          sum = [raisedToPower[0] + z[0], raisedToPower[1] + z[1]]; //[(a^2 - b^2) + a, (2ab) + b]
+          return sum;
+      }
+    }
+
+
+    function pixel(x, y, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, 1, 1);
+    }
+
+    // var socket = io();
+    // var send = function(re, imag, itt) {
+    //       socket.emit('message', {"re":re,"imag":imag, "itt":itt});
+    // }
+
+    function draw(width, height, maxRe, maxIm, maxIterations) {
+      var minRe = -2, maxRe = maxRe, minIm = -1, maxIm = maxIm;
+      var reStep = (maxRe - minRe) / width, imStep = (maxIm - minIm) / height;
+      var re = minRe;
+      while (re < maxRe) {
+        var im = minIm;
+        while (im < maxIm) {
+          // var result = checkMandelbrot([re, im], maxIterations);
+          var result = belongs(re, im, maxIterations);
+          // send(re, im, maxIterations);
+          // socket.on('message', function(data) { 
+          // result = result[1];
+          var x = (re - minRe) / reStep, y = (im - minIm) / imStep;
+          if (result == maxIterations) {
+            pixel(x, y, 'black');
+          } else {
+            var h = 30 + Math.round(120 * result * 1.0 / maxIterations);
+            var color = 'hsl(' + h + ', 100%, 50%)';
+            pixel(x, y, color);
+          }
+          im += imStep; 
+        }
+        re += reStep;
+      }
+    } 
+</script> 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/public/css/style.css"/>
+    <title>Mandelbrot form</title>
+  </head>
+  <body>
+    <h1> Votre point fait il partie du Mandelbrot ? </h1>
+    <form>
+      <div class="container">
+        <label for="real"><strong>Partie réelle</strong></label>
+        <input id="real" placeholder="Enter real number" name="real" required>
+        
+        <label for="imag"><strong>Partie imaginaire</strong></label>
+        <input id="imag" placeholder="Enter imaginary number" name="imag"  required>
+
+        <label for="itt"><strong>Iterations</strong></label>
+        <input type="number" id="itt" placeholder="Enter iterations" name="itt" required>
+      </div>
+
+      <button type="submit" id="confirmBtn">Calculer</button>
+      </div>
+    </form>
+    <div class="resultat">
+        <h4 id="resultat"></h4>
+    </div>
+
+  </body>
+</html>
+
+<script>
+    const real = document.getElementById('real');
+    const imag = document.getElementById('imag');
+    const itt = document.getElementById('itt');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const myResult = document.getElementById("resultat");
+
+    confirmBtn.addEventListener('click', e => {
+        const data = {real : parseFloat(real.value), imag : parseFloat(imag.value), itt : parseFloat(itt.value)}
+        postData('/api/calculate', data).then((data) => {
+            putMessageOnPage(data);
+        })
+        e.preventDefault();
+    });
+
+    async function postData(url='', data={}) {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: { 'Content-Type': 'application/json' },
+        })
+        return response.json();
+    }
+
+    function putMessageOnPage(data){
+        if (data[0]==false){
+            myResult.innerHTML = "Votre nombre n'appartient pas à l'ensemble Mandelbrot en " + data[1] + " itérations";
+        } else {
+            myResult.innerHTML = "Votre nombre appartient à l'ensemble Mandelbrot en " + data[1] + " itérations"; 
+        }
+    }
+</script>
